@@ -39,5 +39,6 @@
 <script>
 export default {
 	name: 'SettingIndex',
+	middleware: 'authenticated',
 };
 </script>

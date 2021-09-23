@@ -12,65 +12,149 @@
 				<div class="col-md-9">
 					<div class="feed-toggle">
 						<ul class="nav nav-pills outline-active">
-							<li class="nav-item">
-								<a class="nav-link disabled" href="">Your Feed</a>
+							<li v-if="user" class="nav-item">
+								<nuxt-link
+									class="nav-link"
+									:class="{
+										active: tab === 'your_feed',
+									}"
+									exact
+									:to="{
+										name: 'home',
+										query: {
+											tab: 'your_feed',
+										},
+									}"
+									>Your Feed</nuxt-link
+								>
 							</li>
 							<li class="nav-item">
-								<a class="nav-link active" href="">Global Feed</a>
+								<nuxt-link
+									class="nav-link"
+									:class="{
+										active: tab === 'global_feed',
+									}"
+									exact
+									:to="{
+										name: 'home',
+										query: {
+											tab: 'global_feed',
+										},
+									}"
+									>Global Feed</nuxt-link
+								>
+							</li>
+							<li v-if="tag" class="nav-item">
+								<nuxt-link
+									class="nav-link active"
+									:class="{
+										active: tab === 'global_feed',
+									}"
+									exact
+									:to="{
+										name: 'home',
+										query: {
+											tab: 'global_feed',
+										},
+									}"
+									>#{{ tag }}</nuxt-link
+								>
 							</li>
 						</ul>
 					</div>
 
-					<div class="article-preview">
+					<div class="article-preview" v-for="article in articles" :key="article.slug">
 						<div class="article-meta">
-							<a href="profile.html"><img src="http://i.imgur.com/Qr71crq.jpg"/></a>
+							<nuxt-link
+								:to="{
+									name: 'Profile',
+									params: {
+										username: article.author.username,
+									},
+								}"
+							>
+								<img :src="article.author.image" />
+							</nuxt-link>
 							<div class="info">
-								<a href="" class="author">Eric Simons</a>
-								<span class="date">January 20th</span>
+								<nuxt-link
+									:to="{
+										name: 'Profile',
+										params: {
+											username: article.author.username,
+										},
+									}"
+									class="author"
+									>{{ article.author.username }}</nuxt-link
+								>
+								<span class="date">{{ article.createdAt }}</span>
+								<!-- <span class="date">{{ article.createdAt | date('MMM DD, YYYY') }}</span> -->
 							</div>
-							<button class="btn btn-outline-primary btn-sm pull-xs-right">
-								<i class="ion-heart"></i> 29
+							<button
+								class="btn btn-outline-primary btn-sm pull-xs-right"
+								:class="{ active: article.favorited }"
+							>
+								<i class="ion-heart"></i> {{ article.favoritesCount }}
 							</button>
 						</div>
-						<a href="" class="preview-link">
-							<h1>How to build webapps that scale</h1>
-							<p>This is the description for the post.</p>
+						<nuxt-link
+							href=""
+							class="preview-link"
+							:to="{
+								name: 'Article',
+								params: {
+									slug: article.slug,
+								},
+							}"
+						>
+							<h1>{{ article.title }}</h1>
+							<p>{{ article.body }}</p>
 							<span>Read more...</span>
-						</a>
+						</nuxt-link>
 					</div>
-
-					<div class="article-preview">
-						<div class="article-meta">
-							<a href="profile.html"><img src="http://i.imgur.com/N4VcUeJ.jpg"/></a>
-							<div class="info">
-								<a href="" class="author">Albert Pai</a>
-								<span class="date">January 20th</span>
-							</div>
-							<button class="btn btn-outline-primary btn-sm pull-xs-right">
-								<i class="ion-heart"></i> 32
-							</button>
-						</div>
-						<a href="" class="preview-link">
-							<h1>The song you won't ever stop singing. No matter how hard you try.</h1>
-							<p>This is the description for the post.</p>
-							<span>Read more...</span>
-						</a>
-					</div>
+					<nav>
+						<ul class="pagination">
+							<li
+								class="page-item"
+								:class="{
+									active: item === page,
+								}"
+								v-for="item in totalPage"
+								:key="item"
+							>
+								<nuxt-link
+									class="page-link"
+									:to="{
+										name: 'home',
+										query: {
+											page: item,
+											tag: $route.query.tag,
+											tab: tab,
+										},
+									}"
+									>{{ item }}</nuxt-link
+								>
+							</li>
+						</ul>
+					</nav>
 				</div>
-
 				<div class="col-md-3">
 					<div class="sidebar">
 						<p>Popular Tags</p>
 
 						<div class="tag-list">
-							<a href="" class="tag-pill tag-default">programming</a>
-							<a href="" class="tag-pill tag-default">javascript</a>
-							<a href="" class="tag-pill tag-default">emberjs</a>
-							<a href="" class="tag-pill tag-default">angularjs</a>
-							<a href="" class="tag-pill tag-default">react</a>
-							<a href="" class="tag-pill tag-default">mean</a>
-							<a href="" class="tag-pill tag-default">node</a>
-							<a href="" class="tag-pill tag-default">rails</a>
+							<nuxt-link
+								:to="{
+									name: 'home',
+									query: {
+										tab: 'tag',
+										tag,
+									},
+								}"
+								class="tag-pill tag-default"
+								v-for="tag in tags"
+								:key="tag"
+								>{{ tag }}</nuxt-link
+							>
 						</div>
 					</div>
 				</div>
@@ -79,7 +163,42 @@
 	</div>
 </template>
 <script>
+import { getArticles, getArticlesFeed } from '@/api/article';
+import { getTags } from '@/api/tag';
+import { mapState } from 'vuex';
 export default {
 	name: 'HomeIndex',
+	async asyncData({ query, store }) {
+		const page = Number.parseInt(query.page || 1);
+		const limit = 20;
+		const tag = query.tag;
+		const tab = query.tab || 'global_feed';
+		const loadArticles = store.state.user && tab === 'your_feed' ? getArticlesFeed : getArticles;
+		const [listData, tagsData] = await Promise.all([
+			loadArticles({
+				limit,
+				offset: (page - 1) * limit,
+				tag,
+			}),
+			getTags(),
+		]);
+		const { data } = listData;
+		return {
+			articles: data.articles || [],
+			articlesCount: data.articlesCount,
+			tags: tagsData.data.tags,
+			limit,
+			page,
+			tag,
+			tab,
+		};
+	},
+	watchQuery: ['page', 'tag', 'tab'],
+	computed: {
+		...mapState(['user']),
+		totalPage() {
+			return Math.ceil(this.articlesCount / this.limit);
+		},
+	},
 };
 </script>
