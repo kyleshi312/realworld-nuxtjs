@@ -48,13 +48,14 @@
 								<nuxt-link
 									class="nav-link active"
 									:class="{
-										active: tab === 'global_feed',
+										active: tab === 'tag',
 									}"
 									exact
 									:to="{
 										name: 'home',
 										query: {
-											tab: 'global_feed',
+											tab: 'tag',
+											tag,
 										},
 									}"
 									>#{{ tag }}</nuxt-link
@@ -174,7 +175,14 @@ export default {
 		const tag = query.tag;
 		const tab = query.tab || 'global_feed';
 		const loadArticles = store.state.user && tab === 'your_feed' ? getArticlesFeed : getArticles;
-		const [listData, tagsData] = await Promise.all([
+		console.log('a11111', loadArticles);
+		// const articleRes = await loadArticles({
+		// 	limit,
+		// 	offset: (page - 1) * limit,
+		// 	tag,
+		// });
+		// const tagRes = await getTags();
+		const [articleRes, tagRes] = await Promise.all([
 			loadArticles({
 				limit,
 				offset: (page - 1) * limit,
@@ -182,11 +190,13 @@ export default {
 			}),
 			getTags(),
 		]);
-		const { data } = listData;
+		const { articles, articlesCount } = articleRes.data;
+		const { tags } = tagRes.data;
+		console.log('tag', tag);
 		return {
-			articles: data.articles || [],
-			articlesCount: data.articlesCount,
-			tags: tagsData.data.tags,
+			articles,
+			articlesCount,
+			tags,
 			limit,
 			page,
 			tag,
