@@ -1,4 +1,4 @@
-import request from '@/utils/request';
+import { request } from '@/plugins/request';
 
 // get public article list
 export const getArticles = (params) => {
@@ -14,9 +14,22 @@ export const getArticlesFeed = (params) => {
 	return request({
 		method: 'GET',
 		url: '/api/articles/feed',
-		headers: {
-			Authorization: `Token eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MjIyODQ3LCJ1c2VybmFtZSI6InF3ZXJmZGFzIiwiZXhwIjoxNjM3NTA2OTcwfQ.x83lP7ME9wPYP92q8mv_-fV0W7hHP_Ef2E5iMAyR7KE`,
-		},
 		params,
+	});
+};
+
+// 添加点赞
+export const addFavorite = (slug) => {
+	return request({
+		method: 'POST',
+		url: `/api/articles/${slug}/favorite`,
+	});
+};
+
+// 取消点赞
+export const deleteFavorite = (slug) => {
+	return request({
+		method: 'DELETE',
+		url: `/api/articles/${slug}/favorite`,
 	});
 };

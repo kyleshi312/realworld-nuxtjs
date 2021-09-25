@@ -82,7 +82,7 @@ export default {
 				console.log('login');
 				const { data } = this.isLogin ? await login(this.user) : await register(this.user);
 
-				this.$store.commit('setUser', JSON.stringify(data.user));
+				this.$store.commit('setUser', data.user);
 				Cookie.set('user', JSON.stringify(data.user));
 				this.$router.push('/');
 			} catch (e) {

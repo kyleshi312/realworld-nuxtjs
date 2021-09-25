@@ -87,12 +87,14 @@
 									class="author"
 									>{{ article.author.username }}</nuxt-link
 								>
-								<span class="date">{{ article.createdAt }}</span>
+								<span class="date">{{ article.createdAt | date('MMM DD, YYYY') }}</span>
 								<!-- <span class="date">{{ article.createdAt | date('MMM DD, YYYY') }}</span> -->
 							</div>
 							<button
 								class="btn btn-outline-primary btn-sm pull-xs-right"
 								:class="{ active: article.favorited }"
+								@click="onFavorite(article)"
+								:disabled="article.favouriteDisabled"
 							>
 								<i class="ion-heart"></i> {{ article.favoritesCount }}
 							</button>
@@ -164,7 +166,7 @@
 	</div>
 </template>
 <script>
-import { getArticles, getArticlesFeed } from '@/api/article';
+import { getArticles, getArticlesFeed, addFavorite, deleteFavorite } from '@/api/article';
 import { getTags } from '@/api/tag';
 import { mapState } from 'vuex';
 export default {
@@ -176,12 +178,6 @@ export default {
 		const tab = query.tab || 'global_feed';
 		const loadArticles = store.state.user && tab === 'your_feed' ? getArticlesFeed : getArticles;
 		console.log('a11111', loadArticles);
-		// const articleRes = await loadArticles({
-		// 	limit,
-		// 	offset: (page - 1) * limit,
-		// 	tag,
-		// });
-		// const tagRes = await getTags();
 		const [articleRes, tagRes] = await Promise.all([
 			loadArticles({
 				limit,
@@ -190,9 +186,10 @@ export default {
 			}),
 			getTags(),
 		]);
-		const { articles, articlesCount } = articleRes.data;
-		const { tags } = tagRes.data;
-		console.log('tag', tag);
+		console.log('loadArticles', loadArticles);
+		const { articles, articlesCount } = articleRes ? articleRes.data : { articles: [] };
+		const { tags } = tagRes ? tagRes.data : { tags: [] };
+		articles.forEach((article) => (article.favouriteDisabled = false));
 		return {
 			articles,
 			articlesCount,
@@ -208,6 +205,22 @@ export default {
 		...mapState(['user']),
 		totalPage() {
 			return Math.ceil(this.articlesCount / this.limit);
+		},
+	},
+	methods: {
+		async onFavorite(article) {
+			article.favouriteDisabled = true;
+			if (article.favorited) {
+				await deleteFavorite(article.slug);
+
+				article.favorited = false;
+				article.favoritesCount += -1;
+			} else {
+				await addFavorite(article.slug);
+				article.favorited = true;
+				article.favoritesCount += 1;
+			}
+			article.favouriteDisabled = false;
 		},
 	},
 };
