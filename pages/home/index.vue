@@ -166,7 +166,7 @@
 	</div>
 </template>
 <script>
-import { getArticles, getArticlesFeed, addFavorite, deleteFavorite } from '@/api/article';
+import { getArticles, getArticlesFeed, addFavorite, deleteFavorite, getArticle, getComments } from '@/api/article';
 import { getTags } from '@/api/tag';
 import { mapState } from 'vuex';
 export default {
