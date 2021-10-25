@@ -21,7 +21,7 @@
 			<body>
 				<nav class="navbar navbar-light">
 					<div class="container">
-						<nuxt-link class="navbar-brand" to="/">kyleshi</nuxt-link>
+						<nuxt-link class="navbar-brand" to="/">kyleshi shi</nuxt-link>
 						<ul class="nav navbar-nav pull-xs-right">
 							<li class="nav-item">
 								<!-- Add "active" class when you're on that page" -->
