@@ -20,3 +20,14 @@ export const register = (data) => {
 		},
 	});
 };
+
+// user register
+export const updateSetting = (data) => {
+	return request({
+		method: 'PUT',
+		url: '/api/user',
+		data: {
+			user: data,
+		},
+	});
+};

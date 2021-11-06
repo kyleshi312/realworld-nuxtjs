@@ -79,7 +79,6 @@ export default {
 		async onSubmit() {
 			// login request
 			try {
-				console.log('login');
 				const { data } = this.isLogin ? await login(this.user) : await register(this.user);
 
 				this.$store.commit('setUser', data.user);

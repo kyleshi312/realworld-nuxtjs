@@ -177,7 +177,6 @@ export default {
 		const tag = query.tag;
 		const tab = query.tab || 'global_feed';
 		const loadArticles = store.state.user && tab === 'your_feed' ? getArticlesFeed : getArticles;
-		console.log('a11111', loadArticles);
 		const [articleRes, tagRes] = await Promise.all([
 			loadArticles({
 				limit,
@@ -186,7 +185,6 @@ export default {
 			}),
 			getTags(),
 		]);
-		console.log('loadArticles', loadArticles);
 		const { articles, articlesCount } = articleRes ? articleRes.data : { articles: [] };
 		const { tags } = tagRes ? tagRes.data : { tags: [] };
 		articles.forEach((article) => (article.favouriteDisabled = false));
@@ -212,7 +210,6 @@ export default {
 			article.favouriteDisabled = true;
 			if (article.favorited) {
 				await deleteFavorite(article.slug);
-
 				article.favorited = false;
 				article.favoritesCount += -1;
 			} else {

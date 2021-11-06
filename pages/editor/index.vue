@@ -65,6 +65,9 @@
 </template>
 <script>
 import { publishArticle } from '@/api/editor';
+import { getArticle } from '@/api/article';
+import MarkdownIt from 'markdown-it';
+
 export default {
 	name: 'EditorIndex',
 	middleware: 'authenticated',
@@ -80,7 +83,18 @@ export default {
 			btnLoading: false,
 		};
 	},
+	mounted() {
+		this.getArticle();
+	},
 	methods: {
+		async getArticle() {
+			const { slug } = this.$route.query;
+			if (slug) {
+				const { data } = await getArticle(slug);
+				const { article } = data;
+				this.article = article;
+			}
+		},
 		addTagList() {
 			console.log('enter clidk');
 			if (!this.tag.trim()) return;
@@ -99,13 +113,11 @@ export default {
 			try {
 				const res = await publishArticle(this.article);
 				this.btnLoading = false;
-				console.log('res', typeof res.data, Object.keys(res.data));
 				if (res.data.article) {
+					const { slug } = res.data.article;
 					this.$router.push({
 						name: 'Article',
-						query: {
-							slug: JSON.parse(res.data).article.slug,
-						},
+						params: { slug },
 					});
 				}
 			} catch (e) {

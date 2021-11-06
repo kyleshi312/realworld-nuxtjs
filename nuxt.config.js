@@ -12,7 +12,7 @@ module.exports = {
 						component: resolve(__dirname, 'pages/layout/index.vue'),
 						children: [
 							{
-								path: '', // default child router
+								path: '/', // default child router
 								name: 'home',
 								component: resolve(__dirname, 'pages/home'),
 							},

@@ -10,7 +10,6 @@ export const state = () => {
 
 export const mutations = {
 	setUser(state, data) {
-		console.log('setUser', data);
 		state.user = data;
 	},
 };
@@ -21,12 +20,10 @@ export const actions = {
 	// 作用：初始化容器数据，传递数据给客户端使用
 	nuxtServerInit({ commit }, { req }) {
 		let user = null;
-		console.log('cookieparser');
 		// 如果请求头中有 Cookie
 		if (req.headers.cookie) {
 			// 使用 cookieparser 把 cookie 字符串转为 JavaScript 对象
 			const parsed = cookieparser.parse(req.headers.cookie);
-			console.log('user', parsed);
 			try {
 				user = JSON.parse(parsed.user);
 			} catch (err) {

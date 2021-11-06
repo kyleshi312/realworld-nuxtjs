@@ -49,3 +49,11 @@ export const getComments = (slug) => {
 		url: `/api/articles/${slug}/comments`,
 	});
 };
+
+// 取消点赞
+export const deleteArticle = (slug) => {
+	return request({
+		method: 'DELETE',
+		url: `/api/articles/${slug}`,
+	});
+};

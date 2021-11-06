@@ -4,16 +4,38 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-xs-12 col-md-10 offset-md-1">
-						<img src="http://i.imgur.com/Qr71crq.jpg" class="user-img" />
-						<h4>Eric Simons</h4>
+						<img
+							:src="user.image"
+							onerror="https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fpic.90sjimg.com%2Fdesign%2F00%2F67%2F59%2F63%2F58e89bea3086c.png&refer=http%3A%2F%2Fpic.90sjimg.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1638785770&t=4faec0bff13425c5a30392272fb1f475"
+							class="user-img"
+						/>
+						<h4>{{ user.username }}</h4>
 						<p>
-							Cofounder @GoThinkster, lived in Aol's HQ for a few months, kinda looks like Peeta from the
-							Hunger Games
+							{{ user.bio }}
 						</p>
-						<button class="btn btn-sm btn-outline-secondary action-btn">
-							<i class="ion-plus-round"></i>
-							&nbsp; Follow Eric Simons
-						</button>
+						<div v-if="isCurrentUser()">
+							<router-link class="btn btn-sm btn-outline-secondary action-btn" :to="{ name: 'settings' }">
+								<i class="ion-gear-a"></i> Edit Profile Settings
+							</router-link>
+						</div>
+						<div v-else>
+							<!-- <button
+								class="btn btn-sm btn-secondary action-btn"
+								v-if="profile.following"
+								@click.prevent="unfollow()"
+							>
+								<i class="ion-plus-round"></i> &nbsp;Unfollow
+								{{ profile.username }}
+							</button>
+							<button
+								class="btn btn-sm btn-outline-secondary action-btn"
+								v-if="!profile.following"
+								@click.prevent="follow()"
+							>
+								<i class="ion-plus-round"></i> &nbsp;Follow
+								{{ profile.username }}
+							</button> -->
+						</div>
 					</div>
 				</div>
 			</div>
@@ -78,8 +100,33 @@
 	</div>
 </template>
 <script>
+import { mapState } from 'vuex';
+
 export default {
 	name: 'profile',
 	middleware: 'authenticated',
+	computed: {
+		...mapState(['user']),
+	},
+	methods: {
+		isCurrentUser() {
+			if (this.user.usernamee) {
+				return true;
+			}
+			return false;
+		},
+		follow() {
+			// if (this.isCurrentUser()) return;
+			// this.$store.dispatch(FETCH_PROFILE_FOLLOW, this.$route.params);
+		},
+		unfollow() {
+			// this.$store.dispatch(FETCH_PROFILE_UNFOLLOW, this.$route.params);
+		},
+	},
+	watch: {
+		// $route(to) {
+		// 	this.$store.dispatch(FETCH_PROFILE, to.params);
+		// },
+	},
 };
 </script>
