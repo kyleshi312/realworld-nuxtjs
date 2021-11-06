@@ -6,23 +6,54 @@
 					<form>
 						<fieldset>
 							<fieldset class="form-group">
-								<input type="text" class="form-control form-control-lg" placeholder="Article Title" />
+								<input
+									type="text"
+									v-model="article.title"
+									class="form-control form-control-lg"
+									placeholder="Article Title"
+								/>
 							</fieldset>
 							<fieldset class="form-group">
-								<input type="text" class="form-control" placeholder="What's this article about?" />
+								<input
+									type="text"
+									v-model="article.description"
+									class="form-control"
+									placeholder="What's this article about?"
+								/>
 							</fieldset>
 							<fieldset class="form-group">
 								<textarea
+									v-model="article.body"
 									class="form-control"
 									rows="8"
 									placeholder="Write your article (in markdown)"
 								></textarea>
 							</fieldset>
 							<fieldset class="form-group">
-								<input type="text" class="form-control" placeholder="Enter tags" />
-								<div class="tag-list"></div>
+								<input
+									type="text"
+									v-model="tag"
+									@keydown.enter="addTagList"
+									class="form-control"
+									placeholder="Enter tags"
+								/>
+								<div class="tag-list">
+									<span
+										v-for="tag in article.tagList"
+										:key="tag"
+										class="tag-default tag-pill ng-binding ng-scope"
+									>
+										<i class="ion-close-round" @click.prevent="removeTag(tag)"></i>
+										{{ tag }}
+									</span>
+								</div>
 							</fieldset>
-							<button class="btn btn-lg pull-xs-right btn-primary" type="button">
+							<button
+								class="btn btn-lg pull-xs-right btn-primary"
+								:disabled="btnLoading"
+								@click="publishArticle"
+								type="button"
+							>
 								Publish Article
 							</button>
 						</fieldset>
@@ -33,8 +64,56 @@
 	</div>
 </template>
 <script>
+import { publishArticle } from '@/api/editor';
 export default {
 	name: 'EditorIndex',
 	middleware: 'authenticated',
+	data() {
+		return {
+			tag: '',
+			article: {
+				title: '',
+				description: '',
+				body: '',
+				tagList: [],
+			},
+			btnLoading: false,
+		};
+	},
+	methods: {
+		addTagList() {
+			console.log('enter clidk');
+			if (!this.tag.trim()) return;
+			if (this.article.tagList.includes(this.tag)) {
+				return;
+			}
+			this.article.tagList.push(this.tag);
+			this.tag = '';
+		},
+		removeTag(tag) {
+			const tagIdx = this.article.tagList.findIndex((n) => n === this.tag);
+			this.article.tagList.splice(tagIdx, 1);
+		},
+		async publishArticle() {
+			this.btnLoading = true;
+			try {
+				const res = await publishArticle(this.article);
+				this.btnLoading = false;
+				console.log('res', typeof res.data, Object.keys(res.data));
+				if (res.data.article) {
+					this.$router.push({
+						name: 'Article',
+						query: {
+							slug: JSON.parse(res.data).article.slug,
+						},
+					});
+				}
+			} catch (e) {
+				console.log(e);
+				this.btnLoading = false;
+				return;
+			}
+		},
+	},
 };
 </script>
